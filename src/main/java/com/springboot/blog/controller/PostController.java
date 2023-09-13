@@ -5,6 +5,8 @@ import com.springboot.blog.dto.PostDto;
 import com.springboot.blog.dto.PostResponse;
 import com.springboot.blog.service.PostService;
 import com.springboot.blog.utils.AppConstants;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequestMapping("/api/posts")
 @Tag(name = "CRUD REST APIs for Post Resource")
 public class PostController {
+
     //we are injecting an interface not a class to create loose coupling
     private PostService postService;
 
@@ -28,6 +31,14 @@ public class PostController {
         this.postService = postService;
     }
 
+    @Operation(
+            summary = "Create Post Rest API",
+            description = "Create Post Rest API is used to save post into database"
+    )
+    @ApiResponse(
+            responseCode = "201",
+            description = "Http status 201 CREATED"
+    )
     // lock the createPost method in swagger until Bearer Key is inserted
     @SecurityRequirement(name = "Bearer Authentication")
     //check role field for "ADMIN"
@@ -37,7 +48,14 @@ public class PostController {
         return new ResponseEntity<>(postService.createPost(postDto), HttpStatus.CREATED);
     }
 
-    // gets all posts from the database - http://localhost:8080/api/posts?pageNo=1&pageSize=5&sortBy=title
+    @Operation(
+            summary = "Get All Posts Rest API",
+            description = "Get Post Rest API is used to fetch all the posts from database"
+    )
+    @ApiResponse(
+            responseCode = "201",
+            description = "Http status 201 CREATED"
+    )
     @GetMapping
     public PostResponse getAllPost(
             // the annotation below will be responsible for paging support
@@ -49,12 +67,27 @@ public class PostController {
         return postService.getAllPost(pageNo, pageSize, sortBY, sortDir);
     }
 
+    @Operation(
+            summary = "Get Post By Id Rest API",
+            description = "Get Post By Id Rest API is used to get single post from database"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Http Status 200 SUCCESS"
+    )
     @GetMapping("/{id}")
     public ResponseEntity<PostDto> getById(@PathVariable(name = "id") long id){
         return ResponseEntity.ok(postService.getPostBy(id));
     }
 
-    //Update existing post
+    @Operation(
+            summary = "Updated Post Rest API",
+            description = "Put Post Rest API is used to update existing post from database"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Http status 200 OK"
+    )
     @SecurityRequirement(name = "Bearer Authentication")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
@@ -63,7 +96,14 @@ public class PostController {
         return new ResponseEntity<>(postResponse, HttpStatus.OK);
     }
 
-    // delete post api
+    @Operation(
+            summary = "Delete Post Rest API",
+            description = "Delete Post Rest API is used to delete post from database"
+    )
+    @ApiResponse(
+            responseCode = "201",
+            description = "Http status 201 CREATED"
+    )
     @SecurityRequirement(name = "Bearer Authentication")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
