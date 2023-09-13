@@ -5,6 +5,8 @@ import com.springboot.blog.dto.PostDto;
 import com.springboot.blog.dto.PostResponse;
 import com.springboot.blog.service.PostService;
 import com.springboot.blog.utils.AppConstants;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
+@Tag(name = "CRUD REST APIs for Post Resource")
 public class PostController {
     //we are injecting an interface not a class to create loose coupling
     private PostService postService;
@@ -25,6 +28,8 @@ public class PostController {
         this.postService = postService;
     }
 
+    // lock the createPost method in swagger until Bearer Key is inserted
+    @SecurityRequirement(name = "Bearer Authentication")
     //check role field for "ADMIN"
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
@@ -49,6 +54,8 @@ public class PostController {
         return ResponseEntity.ok(postService.getPostBy(id));
     }
 
+    //Update existing post
+    @SecurityRequirement(name = "Bearer Authentication")
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<PostDto> updatePost(@Valid @RequestBody PostDto postDto, @PathVariable(name = "id") long id){
@@ -57,10 +64,19 @@ public class PostController {
     }
 
     // delete post api
+    @SecurityRequirement(name = "Bearer Authentication")
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletePost(@PathVariable(name = "id") long id){
         postService.deletePostByID(id);
         return new ResponseEntity<>("Post has been deleted", HttpStatus.OK);
+    }
+
+    // Get all posts belonging to CategoryId
+    // http://localhost:8080/api/posts/category/8
+    @GetMapping("/category/{id}")
+    public ResponseEntity<List<PostDto>> getPostsBYCategorry(@PathVariable("id") Long categoryId){
+        List<PostDto> postDtos = postService.getPostsByCategory(categoryId);
+        return ResponseEntity.ok(postDtos);
     }
 }
